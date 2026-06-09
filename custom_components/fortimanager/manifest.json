@@ -1,0 +1,12 @@
+{
+  "domain": "fortimanager",
+  "name": "FortiManager",
+  "version": "0.1.0",
+  "config_flow": true,
+  "documentation": "https://github.com/JochenFriedrich/ha-fortimanager",
+  "issue_tracker": "https://github.com/JochenFriedrich/ha-fortimanager/issues",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@JochenFriedrich"],
+  "iot_class": "local_polling"
+}
