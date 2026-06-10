@@ -125,6 +125,27 @@ class FortiManagerClient:
         data = result.get("data")
         return data if isinstance(data, list) else []
 
+    async def get_available_firmware(self) -> list[dict]:
+        """Return firmware images available in the FMG upgrade manager (um/image/list).
+
+        Each entry typically has: platform, version, type, flags.
+        Returns empty list on older FMG versions that don't expose this endpoint.
+        """
+        if not self._session_token:
+            await self.login()
+        try:
+            result = await self._request(
+                "get",
+                [{"url": "um/image/list", "option": "imagedb"}],
+            )
+            result = result.get("result", [{}])[0]
+            data = result.get("data")
+            imagelist = data.get("image_list")
+            return imagelist if isinstance(imagelist, list) else []
+        except FortiManagerConnectionError as err:
+            _LOGGER.debug("um/image/list unavailable on this FMG: %s", err)
+            return []
+
     async def close(self) -> None:
         """Clean up."""
         await self.logout()

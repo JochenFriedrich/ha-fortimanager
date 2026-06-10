@@ -99,8 +99,10 @@ async def async_setup_entry(
     def _add_new_devices() -> None:
         if not coordinator.data:
             return
+        # coordinator.data is (devices, available_firmware) tuple
+        devices = coordinator.data[0] if isinstance(coordinator.data, tuple) else coordinator.data
         new_entities = []
-        for device in coordinator.data:
+        for device in devices:
             serial = device.get("sn") or device.get("name")
             if not serial or serial in known_devices:
                 continue
@@ -145,7 +147,8 @@ class FortiManagerSensor(CoordinatorEntity, SensorEntity):
     def _get_device(self) -> dict | None:
         if not self.coordinator.data:
             return None
-        for d in self.coordinator.data:
+        devices = self.coordinator.data[0] if isinstance(self.coordinator.data, tuple) else self.coordinator.data
+        for d in devices:
             if (d.get("sn") or d.get("name")) == self._serial:
                 return d
         return None

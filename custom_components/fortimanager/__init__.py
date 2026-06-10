@@ -15,7 +15,7 @@ from .const import CLIENT, CONF_VERIFY_SSL, COORDINATOR, DEFAULT_SCAN_INTERVAL, 
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.UPDATE]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -35,9 +35,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except FortiManagerConnectionError as err:
         raise ConfigEntryNotReady from err
 
-    async def _async_update_data() -> list[dict]:
+    async def _async_update_data() -> tuple[list[dict], list[dict]]:
+        """Return (devices, available_firmware) tuple.
+
+        available_firmware may be empty on older FMG versions — that's fine,
+        the update entities will simply report no update known.
+        """
         try:
-            return await client.get_devices()
+            devices = await client.get_devices()
+            firmware = await client.get_available_firmware()
+            return devices, firmware
         except FortiManagerAuthError as err:
             raise ConfigEntryAuthFailed from err
         except FortiManagerConnectionError as err:
